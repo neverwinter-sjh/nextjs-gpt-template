@@ -26,12 +26,20 @@ export default async function (req, res) {
   }
 
   try {
-    const completion = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: generatePrompt(animal),
+    const chatCompletion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {role: "user", content: "슈퍼히어로와 같은 동물 이름을 지어줘. 항상 한글로만 대답해야 돼."},
+        {role: "user", content: "고양이"},
+        {role: "system", content: "캡틴 샤프클로우, 슈퍼 블랙캣, 아이언캣"},
+        {role: "user", content: "개"},
+        {role: "system", content: "배트바둑이, 슈퍼 블랙독, 아이언독"},
+        {role: "user", content: animal},
+      ],
       temperature: 0.6,
     });
-    res.status(200).json({ result: completion.data.choices[0].text });
+    console.log(chatCompletion.data.choices[0].message);
+    res.status(200).json({ result: chatCompletion.data.choices[0].message.content });
   } catch(error) {
     // Consider adjusting the error handling logic for your use case
     if (error.response) {
@@ -48,15 +56,4 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(animal) {
-  const capitalizedAnimal =
-    animal[0].toUpperCase() + animal.slice(1).toLowerCase();
-  return `Suggest three names for an animal that is a superhero.
 
-Animal: Cat
-Names: Captain Sharpclaw, Agent Fluffball, The Incredible Feline
-Animal: Dog
-Names: Ruff the Protector, Wonder Canine, Sir Barks-a-Lot
-Animal: ${capitalizedAnimal}
-Names:`;
-}
